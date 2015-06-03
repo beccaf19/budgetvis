@@ -3,7 +3,8 @@ var margin = {top: 10, right: 20, bottom: 50, left: 100};
     var w = 1200 - margin.left - margin.right;
     var h = 600 - margin.top - margin.bottom;
 
-var dataset; //to hold full dataset
+var dataset = [];
+
 
 var attributes = ["fiscalYear", "unit", "amount"]
 var ranges = [[2012, 2015], [0,700]]
@@ -16,34 +17,54 @@ var minDate = 2012,
 
 $(document).ready(function(){
 
-  d3.csv("universityunits_12.csv", function(error, universityUnits) {
-
-    //read each year in seperately to nest them 
-
-
-  //read in the data
+  d3.csv("universityunits_12.csv", function(error, universityUnits12) {
+  //read in the data from 2012
     if (error) {
       return console.warn(error);
     }
-    universityUnits.forEach(function(d) {
+    universityUnits12.forEach(function(d) {
        // d.unit = +d.unit;
        // d.amount = +d.amount;
        // d.fiscalYear = +d.FY;
     });
 
-    dataset= {
-      name: "dataset",
-      children: universityUnits
+    // dataset = {
+    //   name: "dataset",
+    //   children: universityUnits12
+    // }
+
+    dataset.push(universityUnits12);
+  });
+
+  d3.csv("universityunits_13.csv", function(error, universityUnits13) {
+  //read in the data from 2012
+    if (error) {
+      return console.warn(error);
     }
+    universityUnits13.forEach(function(d) {
+       // d.unit = +d.unit;
+       // d.amount = +d.amount;
+       // d.fiscalYear = +d.FY;
+    });
+
+    // dataset= {
+    //   name: "dataset",
+    //   children: universityUnits13
+    // }
+    dataset.push(universityUnits13);
+
+  });
 
 
-     //create SVG element for graph
+  //create SVG element for graph
   // svg = d3.select("body").append("svg")
   //   .attr("width", w + margin.left + margin.right)
   //   .attr("height", h + margin.top + margin.bottom)
   //   .append("g")
   //   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
+  //create DICV for treemap
   div = d3.select("body").append("div")
     .attr("width", w + margin.left + margin.right)
     .attr("height", h + margin.top + margin.bottom)
@@ -51,15 +72,15 @@ $(document).ready(function(){
   
 
   color = d3.scale.category20c(),    
+  //draw data
+  drawVis(dataset);
 
 
-    //draw data
-    drawVis(dataset);
   });
 
 
 
-});
+
 
 
 
@@ -85,7 +106,7 @@ var node = div.datum(dataset).selectAll()
           var fontSize = 0.10*Math.sqrt(d.area)+'px'; 
           return fontSize })
    .text(function(d) { 
-      return d.unit + " " + d.FY });
+      return d.unit + " " + d.FY + ' $'+ d.amount});
 
 
 // var formatxAxis = d3.format('.0f'); 
