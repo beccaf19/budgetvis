@@ -1,41 +1,59 @@
 
-var margin = {top: 10, right: 20, bottom: 50, left: 30};
+var margin = {top: 10, right: 20, bottom: 50, left: 100};
     var w = 1200 - margin.left - margin.right;
     var h = 600 - margin.top - margin.bottom;
 
 var dataset; //to hold full dataset
 
-var attributes = ["date", "amount"]
-var ranges = [[2005, 2015], [0,125]]
-var svg;
+var attributes = ["fiscalYear", "unit", "amount"]
+var ranges = [[2012, 2015], [0,700]]
+var div;
 
 //x axis start and end dates
-var minDate = new Date(2005,00,01),
-    maxDate = new Date(2015,04,01);
+var minDate = 2012,
+    maxDate = 2015;
 
 
 $(document).ready(function(){
 
-  d3.csv("report.csv", function(error, seahawks) {
+  d3.csv("universityunits_12.csv", function(error, universityUnits) {
+
+    //read each year in seperately to nest them 
+
 
   //read in the data
     if (error) {
       return console.warn(error);
     }
-    seahawks.forEach(function(d) {
-       d.searchAmt = +d.searchAmt;
-       d.startDate = +getstartDate(d);
-       d.endDate = +getendDate(d);
+    universityUnits.forEach(function(d) {
+       // d.unit = +d.unit;
+       // d.amount = +d.amount;
+       // d.fiscalYear = +d.FY;
     });
 
-    dataset=seahawks;
+    dataset= {
+      name: "dataset",
+      children: universityUnits
+    }
+
+
      //create SVG element for graph
-  svg = d3.select("body").append("svg")
+  // svg = d3.select("body").append("svg")
+  //   .attr("width", w + margin.left + margin.right)
+  //   .attr("height", h + margin.top + margin.bottom)
+  //   .append("g")
+  //   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  div = d3.select("body").append("div")
     .attr("width", w + margin.left + margin.right)
     .attr("height", h + margin.top + margin.bottom)
-    .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
 
+  color = d3.scale.category20c(),    
+
+
+    //draw data
     drawVis(dataset);
   });
 
@@ -46,198 +64,103 @@ $(document).ready(function(){
 
 
 function drawVis(data) {
-//create axis elements
-var xAxis = d3.svg.axis()
-    .scale(x);
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
+//make treemap
+ var treemap = d3.layout.treemap()
+    .size([w, h])
+    .value(function(d){
+      return d.amount;
+    });
 
-// append axis elements and add labels
-svg.append("g")
-    .attr("class", "axis")
-    .attr("transform", "translate(0," + h + ")")
-    .call(xAxis)
-     .append("text")
-      .attr("x", w)
-      .attr("y", 35)
-      .style("text-anchor", "end")
-      .text("Year");
-
-
-svg.append("g")
-   .attr("class", "axis")
-   .call(yAxis)
-      .append("text")
-      .attr("y",5 )
-      .attr("x", 115)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Web Search Amount");     
+var node = div.datum(dataset).selectAll()
+  .data(treemap.nodes)
+  .enter().append("div")
+  .attr("class", "node")
+  .call(position)
+  .style("background-color", function(d) {
+          return d.name == 'dataset' ? '#fff' : color(d.name); })
+  .append('div')
+  .style("font-size", function(d) {
+          // compute font size based on sqrt(area)
+          var fontSize = 0.10*Math.sqrt(d.area)+'px'; 
+          return fontSize })
+   .text(function(d) { 
+      return d.unit + " " + d.FY });
 
 
+// var formatxAxis = d3.format('.0f'); 
+// //create axis elements
+// var xAxis = d3.svg.axis()
+//     .scale(x)
+//     .ticks(4)
+//     .tickFormat(formatxAxis);
+
+// var yAxis = d3.svg.axis()
+//     .scale(y)
+//     .orient("left");
 
 
-//draw line
-  var lineGen = d3.svg.line()
-  .x(function(d) {
-    return x(d.startDate);
-  })
-  .y(function(d) {
-    return y(d.searchAmt);
-  }); 
+
+// // append axis elements and add labels
+// svg.append("g")
+//     .attr("class", "axis")
+//     .attr("transform", "translate(0," + h + ")")
+//     .call(xAxis)
+//      .append("text")
+//       .attr("x", w)
+//       .attr("y", 35)
+//       .style("text-anchor", "end")
+//       .text("Year");
 
 
-  var div = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-
-  svg.append('svg:path')
-  .attr('d', lineGen(data))
-  .attr('stroke', 'green')
-  .attr('stroke-width', 3)
-  .attr('fill', 'none')
-  .on("mouseover", function(d){
-    var xCoor = d3.mouse(this)[0];
-    var yCoor = d3.mouse(this)[1];
-    var searchValue = y.invert(yCoor);
-    var xDate = x.invert(xCoor); 
-
-    div.transition()
-            .duration(200)
-            .style("opacity", .9);
-        div.html("Date = " + xDate  + " Search Amount = " + searchValue) 
-            .style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
+// svg.append("g")
+//    .attr("class", "axis")
+//    .call(yAxis)
+//       .append("text")
+//       .attr("y",2 )
+//       .attr("x", 20)
+//       .attr("dy", ".71em")
+//       .style("text-anchor", "end")
+//       .text("$");     
 
 
-  })
-  .on("mouseout", function(d) {          
-    div.transition()                
-      .duration(300)                
-      .style("opacity", 0);
-  })
+//draw circles
+// var circle = svg.selectAll("circle")
+//   .data(data)
+//   .enter()
+//   .append("circle")
+//     .attr("cx", function(d) {
+//       return x(d.FY);
+//     })
+//     .attr("cy", function(d){
+//       return y(d.amount);
+//     })
+//     .attr("r", 4)
+//     .style("stroke", "black")
+    
+
 }
 
 
-
+function position() {
+  this.style("left", function(d) { return d.x + 50 + "px"; })
+      .style("top", function(d) { return d.y + 100 + "px"; })
+      .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+      .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+}
 
 
 
 // set axis scales
-var x = d3.time.scale()
+var x = d3.scale.linear()
         .domain([minDate, maxDate])
         .range([0, w]);
 
 var y = d3.scale.linear()
-        .domain([0, 125])
+        .domain([0, 700])
         .range([h, 0]);
 
 
-//get date functions
-function getstartDate(d) {
-  return new Date(d.startDate);
-}
-
-function getendDate(d) {
-  return new Date(d.endDate);
-}
 
 
 
-$(function() {
-  $("#date").slider({  
-    range: true,       
-    min:  2005,      
-    max: 2015,
-    values: [2005, 2015],
-
-    slide: function(event, ui) {
-      $("#dateRange").val(ui.values[0] + " - " + ui.values[1]);
-       
-      var newYear1 = new Date(ui.values[0], 00, 01);
-      var newYear2 = new Date(ui.values[1], 00, 01);
-
-       x = d3.time.scale()
-        .domain([newYear1, newYear2])
-        .range([0, w]);
-
-      xAxis = d3.svg.axis()
-          .scale(x)
-          .orient("bottom"); 
-
-      svg.selectAll(".x.axis")
-      .call(xAxis);
-      svg.selectAll("*").remove();
-      filterData("date", ui.values, newYear1, newYear2);
-    }
-  });
-
-  $("#dateRange").val($("#date").slider("values", 0) +    
-          " - " + $("#date").slider("values", 1));
-  });
-
-$(function() {
-  $("#amount").slider({  
-    range: true,       
-    min:  0,      
-    max: 125,
-    values: [0, 125],
-
-    slide: function(event, ui) {
-      $("#searchAmount").val(ui.values[0] + " - " + ui.values[1]);
-    
-      svg.selectAll("*").remove();
-      filterData("amount", ui.values, minDate, maxDate);
-
-    }
-  });
-
-  $("#searchAmount").val($("#amount").slider("values", 0) +    
-          " - " + $("#amount").slider("values", 1));
-});
-
-
-
-
-
-
-function filterData(attr, values, newYear1, newYear2){
-  for (i = 0; i < attributes.length; i++){
-    if (attr == attributes[i]){       
-      ranges[i] = values;
-    }
-  }
-
-var toVisualize;
-
-  //filter by date
-  toVisualize = dataset.filter(function(d) { 
-     return isInDateRange(d, newYear1, newYear2)
-  });
-
-  //filter by amount
-  toVisualize = toVisualize.filter(function(d){
-      return isInRange(d)
-  });
-  drawVis(toVisualize);
-}
-
-  
-function isInDateRange(datum, newYear1, newYear2){
-      if (getstartDate(datum) < newYear1 || getstartDate(datum) > newYear2){
-        return false;
-      }
-      return true;
-}
-
-
-function isInRange(datum) {
-  if (datum.searchAmt < ranges[1][0] || datum.searchAmt > ranges[1][1]){      
-     return false;     
-  }   else {
-     return true;
-  }
-
-}

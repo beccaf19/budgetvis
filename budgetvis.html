@@ -32,6 +32,31 @@ div.tooltip {
     border-radius: 8px;
     pointer-events: none;
 }
+
+
+.node {
+    border: solid 1px white;
+    line-height: 0.95;
+    overflow: hidden;
+    position: absolute;
+    border-radius: 6px;
+    background-image: -webkit-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+    background-image:    -moz-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+    background-image:     -ms-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+    background-image:      -o-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+    background-image:         linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0)); 
+    text-shadow: -1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px 1px 2px hsla(0,0%,100%,0.25),
+        1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px 0px 2px hsla(0,0%,100%,0.25),
+        1px 0px 2px hsla(0,0%,100%,0.25);
+}
+
+.node div {
+   padding: 6px 4%;
+}
+
 </style>
 
 
@@ -45,9 +70,10 @@ div.tooltip {
  
 <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css' rel='stylesheet' type='text/css'>
 
-<h1> "Seattle Seahawks" Google Search Popularity</h1>
+<h1>UW Budget: FY 2012 - FY 2015</h1>
+<h2>Where does your tuition go?</h2>
 
-<h3>Date Range:</h3>            
+<!-- <h3>Date Range:</h3>            
 	   
     <div id="date" class"slider-range"></div> 
     <input type="text" id="dateRange" readonly style="border:0; color:#f6931f; font-weight:bold;" size='600'>
@@ -57,14 +83,14 @@ div.tooltip {
     <div id="amount" class"slider-range"></div> 
     <input type="text" id="searchAmount" readonly style="border:0; color:#f6931f; font-weight:bold;" size='600'>
 
- <h3 id="instructions">Click on the line to view data values</h3>
+ <h3 id="instructions">Click on the line to view data values</h3> -->
    
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
 
 
-<script src="seahawks.js"></script>
+<script src="budgetvis.js"></script>
 
 
 </body>
