@@ -3,12 +3,12 @@ var margin = {top: 10, right: 20, bottom: 50, left: 100};
     var w = 1200 - margin.left - margin.right;
     var h = 600 - margin.top - margin.bottom;
 
-var dataset = [];
+var dataset;
 
 
 var attributes = ["fiscalYear", "unit", "amount"]
 var ranges = [[2012, 2015], [0,700]]
-var div;
+var div
 
 //x axis start and end dates
 var minDate = 2012,
@@ -19,6 +19,8 @@ $(document).ready(function(){
 
   d3.csv("universityunits_12.csv", function(error, universityUnits12) {
   //read in the data from 2012
+  //initialize array
+  dataset = [ ];
     if (error) {
       return console.warn(error);
     }
@@ -64,7 +66,7 @@ $(document).ready(function(){
   //   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-  //create DICV for treemap
+  //create DIV for treemap
   div = d3.select("body").append("div")
     .attr("width", w + margin.left + margin.right)
     .attr("height", h + margin.top + margin.bottom)
