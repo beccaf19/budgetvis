@@ -1,17 +1,35 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>Zoomable Treemap</title>
-<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="stylesheet"  href="style.css" />
 <script src="http://d3js.org/d3.v2.js"></script>
-<script src="http://code.jquery.com/jquery-1.7.1.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
-<h1>University of Washington Budget (in millions)</h1>
-<h3>Where do your tuition and taxpayer dollars go?</h3>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+<body id='body'>
+
+<h1 id='h1'>University of Washington Budget (in millions)</h1>
+<h3 id='h3'>Where do your tuition and taxpayer dollars go?</h3>
+
+<div class="btn-group" data-toggle="buttons">
+  <label class="btn btn-primary active">
+    <input checked type="radio" name="options" id="overallView" autocomplete="off" s> Treemap View
+  </label>
+  <label class="btn btn-primary">
+    <input type="radio" name="options" id="timeView" autocomplete="off"> Timeline View
+  </label>
+</div>
 
 <p id="chart">
 <p id="rawdata">
+</body>
 
 <script src="treemap.js"></script>
+
 <script>
 	function reSortRoot(root,value_key) {
 		//console.log("Calling");
@@ -35,14 +53,10 @@
 		return root;
 	}
 
-	$( document ).ready(function() {
-		// You can comment out the whole csv section if you just have a JSON file.
-    // loadJSONFile('data/portaldata.json');
-
+    function drawTreemap() {
     	d3.csv("universityunits_12.csv", function(csv_data){
-
 			// Add, remove or change the key values to change the hierarchy. 
-      var nested_data = d3.nest()
+      	var nested_data = d3.nest()
        				
               		.key(function(d)  { return d.FY; })
               		.key(function(d)  { return d.type; })
@@ -59,14 +73,126 @@
 		
 			// Change the key names and children values from .next and add values for a chosen column to define the size of the blocks
 			root = reSortRoot(root,"amount");
-			
-			// DEBUG
-// 			$("#rawdata").html(JSON.stringify(root));
-			
 			loadData(root);
-			
 		});
+    }
+
+function drawTimeline() {
+   d3.csv("UWBudget.csv", function(data) {
+  var years = d3.keys(data[0]).filter(function(key) { 
+  	return key !== "Unit";
+  });
+   data.forEach(function(d) {
+    d.fiscalYears = years.map(function(name) { 
+    	return {
+    		name: name, 
+    		value: +d[name]
+    	}; 
+    });
+  });
+  x0.domain(data.map(function(d) { 
+  	return d.Unit; 
+  }));
+  x1.domain(years).rangeRoundBands([0, x0.rangeBand()]);
+  y.domain([0, d3.max(data, function(d) { 
+  	return d3.max(d.fiscalYears, function(d) {
+   		return d.value; 
+	}); 
+  })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(-10," + height + ")")
+      .call(xAxis)
+      .selectAll('text')
+      	.attr("y", function(d){
+      		return y.dy - 18;
+
+      	})
+      	.attr('font-size','x-small')
+      	.attr("x", "-100")
+      	.attr("transform", function(d) {
+                return "rotate(-90)" 
+        });
+      
+     
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("$ Amount (in millions)");
+
+  var currUnit = svg.selectAll(".Unit")
+      .data(data)
+    .enter().append("g")
+      .attr("class", "g")
+      .attr("transform", function(d) { return "translate(" + x0(d.Unit) + ",0)"; })
 
 
+  .selectAll("rect")
+      .data(function(d) { return d.fiscalYears; })
+    .enter().append("rect")
+      .attr("width", x1.rangeBand())
+      .attr("x", function(d) { return x1(d.name) - 10; })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .style("fill", function(d) { return color(d.name); });
+
+var legend = svg.selectAll(".legend")
+      .data(years.slice().reverse())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 25)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  legend.append("text")
+      .attr("x", width - 30)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d; });
+
+
+
+  });
+}
+    //on page load
+	$( document ).ready(function() {
+	//preload treemap view
+   		//drawTimeline()
+
+   		drawTreemap();
+
+    	//on button click, load treemap
+    $(document).on('change', 'input:radio[id^="overallView"]', function (event) {
+    	$('#chart').empty();
+    	$.getScript( 'treemap.js', function(data, textStatus, jqxhr ) {
+    		//redraw diagram
+        	drawTreemap();
+    	} );
+    	
 	});
+
+		//on button click, load timeline
+
+	 $(document).on('change', 'input:radio[id^="timeView"]', function (event) {
+    	$('#chart').empty();
+    	$.getScript( 'timeline.js', function(data, textStatus, jqxhr ) {
+    		//redraw diagram
+        	drawTimeline();
+    	} );
+    	
+	});
+
+    });
 </script>

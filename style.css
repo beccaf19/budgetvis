@@ -1,20 +1,47 @@
 #chart {
-width: 1000px;
-height: 800px;
-background: #bbb;
-margin: 1px auto;
+width: 1030px;
+height: 815px;
+
+margin: 3px auto;
 position: relative;
 	  -webkit-box-sizing: border-box;
 	  -moz-box-sizing: border-box;
 	  box-sizing: border-box;
 }
 
-h1, h3 {
-	font-family: "Open Sans", Helvetica, Arial, sans-serif; 
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }
 
-h3{
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+
+#body {
+	margin-left: 25px;
+
+}
+
+.btn-group {
+
+	margin-left: 800px;
+}
+
+#h1 {
+	font-family: "Open Sans", Helvetica, Arial, sans-serif; 
+	f
+}
+
+#h3 {
 	font-weight: normal;
+	font-family: "Open Sans", Helvetica, Arial, sans-serif; 
 }
 
 
