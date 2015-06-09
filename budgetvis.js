@@ -17,10 +17,12 @@ var minDate = 2012,
 
 $(document).ready(function(){
 
+  dataset = [ ];
+
   d3.csv("universityunits_12.csv", function(error, universityUnits12) {
   //read in the data from 2012
   //initialize array
-  dataset = [ ];
+  
     if (error) {
       return console.warn(error);
     }
@@ -36,7 +38,7 @@ $(document).ready(function(){
     // }
 
     dataset.push(universityUnits12);
-  });
+  })
 
   d3.csv("universityunits_13.csv", function(error, universityUnits13) {
   //read in the data from 2012
@@ -55,7 +57,7 @@ $(document).ready(function(){
     // }
     dataset.push(universityUnits13);
 
-  });
+  })
 
 
   //create SVG element for graph
@@ -73,9 +75,13 @@ $(document).ready(function(){
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
   
 
-  color = d3.scale.category20c(),    
+  color = d3.scale.category20c();    
   //draw data
-  drawVis(dataset);
+
+  var data12 = dataset[0][1].data;
+  var data13 = dataset[1];
+
+  drawVis(data12);
 
 
   });
@@ -88,6 +94,7 @@ $(document).ready(function(){
 
 function drawVis(data) {
 
+
 //make treemap
  var treemap = d3.layout.treemap()
     .size([w, h])
@@ -95,7 +102,7 @@ function drawVis(data) {
       return d.amount;
     });
 
-var node = div.datum(dataset).selectAll()
+var node = div.datum(data).selectAll()
   .data(treemap.nodes)
   .enter().append("div")
   .attr("class", "node")
